@@ -52,7 +52,7 @@ pub fn parse_cql(input: &str) -> IResult<&str, CqlStatements> {
 }
 
 /// A CQL Type
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html>
 #[derive(Debug, Clone, PartialEq)]
 pub enum CqlType {
     /// The frozen keyword is used to indicate that the type is immutable and can be used as a key in a map or set.
@@ -130,7 +130,7 @@ impl CqlType {
 }
 
 /// The cql native types.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#native-types
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#native-types>
 ///
 /// Grammar:
 /// ```bnf
@@ -149,15 +149,15 @@ pub enum CqlNativeType {
     BLOB,
     /// Boolean value.
     BOOLEAN,
-    /// 64-bit counter. @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#counters
+    /// 64-bit counter. More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#counters>
     COUNTER,
-    /// Date without a time zone. @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#dates
+    /// Date without a time zone. More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#dates>
     DATE,
     /// Arbitrary-precision decimal number.
     DECIMAL,
     /// 64-bit IEEE 754 floating point number.
     DOUBLE,
-    /// A duration of time. @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#durations
+    /// A duration of time. More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#durations>
     DURATION,
     /// 32-bit IEEE 754 floating point number.
     FLOAT,
@@ -169,11 +169,11 @@ pub enum CqlNativeType {
     SMALLINT,
     /// UTF-8 character string.
     TEXT,
-    /// Time without a time zone. @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#times
+    /// Time without a time zone. More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#times>
     TIME,
-    /// Timestamp without a time zone. @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#timestamps
+    /// Timestamp without a time zone. More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#timestamps>
     TIMESTAMP,
-    /// Time-based UUID. @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#timeuuid
+    /// Time-based UUID. More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#timeuuid>
     TIMEUUID,
     /// 8-bit signed integer.
     TINYINT,
@@ -219,7 +219,7 @@ impl CqlNativeType {
 }
 
 /// The cql collection types.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#collections
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#collections>
 ///
 /// Grammar:
 /// ```bnf
@@ -312,7 +312,7 @@ impl CqlCollectionType {
 }
 
 /// User-defined type.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#user-defined-types
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#user-defined-types>
 ///
 /// Type Grammar:
 /// ```bnf
@@ -445,7 +445,7 @@ impl CqlUserDefinedType {
 }
 
 /// Tuple type.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#tuples
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#tuples>
 ///
 /// Grammar:
 /// ```bnf
@@ -503,7 +503,7 @@ impl CqlTupleType {
 }
 
 /// The cql table.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
 ///
 /// Grammar:
 /// ```bnf
@@ -696,7 +696,7 @@ impl CqlTable {
 }
 
 /// The cql column.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
 #[derive(Debug, Clone, PartialEq)]
 pub struct CqlColumn {
     /// The name of the column.
@@ -761,7 +761,7 @@ impl CqlColumn {
 }
 
 /// The cql primary key.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
 #[derive(Debug, Clone, PartialEq)]
 pub struct CqlPrimaryKey {
     /// The partition key.
@@ -879,7 +879,7 @@ impl CqlPrimaryKey {
 }
 
 /// The cql table options.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
 #[derive(Debug, Clone, PartialEq)]
 pub struct CqlTableOptions {
     compact_storage: bool,
@@ -1022,7 +1022,7 @@ impl CqlTableOptions {
 }
 
 /// The cql compaction strategy.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
 #[derive(Debug, Clone, PartialEq)]
 pub struct CqlCompactionStrategy {
     /// The class of the compaction strategy.
@@ -1032,7 +1032,7 @@ pub struct CqlCompactionStrategy {
 }
 
 /// The cql order.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum CqlOrder {
     Asc,
@@ -1149,7 +1149,7 @@ impl Deref for CqlStatements {
 }
 
 /// Cql Identifier.
-/// @see https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#identifiers
+/// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#identifiers>
 /// ```bnf
 /// identifier::= unquoted_identifier | quoted_identifier
 /// unquoted_identifier::= re('[a-zA-Z][link:[a-zA-Z0-9]]*')

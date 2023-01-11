@@ -1,0 +1,15 @@
+[package]
+name = "cql-nom"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+docsrs = []
+
+[dependencies]
+nom = "7"
+uuid = "1"
+
+[package.metadata.docs.rs]
+features = ["docsrs"]
+all-features = true

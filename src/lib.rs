@@ -1306,6 +1306,17 @@ mod test {
     }
 
     #[test]
+    fn test_parse_table_unknown_type() {
+        let input = r#"CREATE TABLE IF NOT EXISTS my_keyspace.my_table (
+            my_field1 int,
+            my_field2 some_unknown_type,
+            PRIMARY KEY (my_field1)
+        ) WITH CLUSTERING ORDER BY (my_field2 DESC);"#;
+        let r = CqlTable::parse(input, &vec![]);
+        assert_eq!(r, Err(Failure(CqlError::UnknownType("some_unknown_type".to_string()))));
+    }
+
+    #[test]
     fn test_parse_statements() {
         let input = r#"
         CREATE TYPE IF NOT EXISTS my_keyspace."my_type" (

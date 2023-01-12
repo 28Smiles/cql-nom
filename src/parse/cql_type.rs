@@ -1,16 +1,15 @@
 use crate::model::cql_type::CqlType;
+use crate::model::identifier::CqlIdentifier;
+use crate::parse::Parse;
+use crate::utils::{angle_bracket, seperated, space0_around};
 use nom::branch::alt;
 use nom::bytes::complete::{tag, tag_no_case};
 use nom::combinator::map;
 use nom::error::ParseError;
-use nom::IResult;
 use nom::multi::separated_list1;
-use crate::model::identifier::CqlIdentifier;
-use crate::parse::Parse;
-use crate::utils::{angle_bracket, seperated, space0_around};
+use nom::IResult;
 
-impl<'de, E: ParseError<&'de str>> Parse<&'de str, E> for CqlType<CqlIdentifier<&'de str>>
-{
+impl<'de, E: ParseError<&'de str>> Parse<&'de str, E> for CqlType<CqlIdentifier<&'de str>> {
     fn parse(input: &'de str) -> IResult<&'de str, Self, E> {
         alt((
             alt((
@@ -47,11 +46,7 @@ impl<'de, E: ParseError<&'de str>> Parse<&'de str, E> for CqlType<CqlIdentifier<
                     angle_bracket(
                         tag_no_case("MAP"),
                         // cql_type ',' cql_type
-                        seperated(
-                            Self::parse,
-                            tag(","),
-                            Self::parse,
-                        ),
+                        seperated(Self::parse, tag(","), Self::parse),
                     ),
                     |(_, (key, _, value))| Self::MAP(Box::new((key, value))),
                 ),
@@ -82,8 +77,8 @@ impl<'de, E: ParseError<&'de str>> Parse<&'de str, E> for CqlType<CqlIdentifier<
 
 #[cfg(test)]
 mod test {
-    use crate::model::identifier::CqlIdentifier;
     use super::*;
+    use crate::model::identifier::CqlIdentifier;
 
     #[test]
     fn test_parse_type_ascii() {
@@ -245,10 +240,7 @@ mod test {
         let result: IResult<_, _, nom::error::Error<&str>> = CqlType::parse(input);
         assert_eq!(
             result,
-            Ok((
-                "",
-                CqlType::MAP(Box::new((CqlType::INT, CqlType::TEXT)))
-            ))
+            Ok(("", CqlType::MAP(Box::new((CqlType::INT, CqlType::TEXT)))))
         );
     }
 
@@ -272,10 +264,7 @@ mod test {
         let result: IResult<_, _, nom::error::Error<&str>> = CqlType::parse(input);
         assert_eq!(
             result,
-            Ok((
-                "",
-                CqlType::TUPLE(vec![CqlType::INT, CqlType::TEXT])
-            ))
+            Ok(("", CqlType::TUPLE(vec![CqlType::INT, CqlType::TEXT])))
         );
     }
 

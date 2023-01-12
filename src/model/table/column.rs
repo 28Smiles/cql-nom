@@ -1,5 +1,7 @@
 use crate::model::cql_type::CqlType;
 use crate::model::identifier::CqlIdentifier;
+use crate::model::qualified_identifier::CqlQualifiedIdentifier;
+use crate::model::Identifiable;
 use derive_where::derive_where;
 
 /// The cql column.
@@ -51,5 +53,11 @@ impl<I, UdtType> CqlColumn<I, UdtType> {
     /// Returns whether the column is part of the primary key.
     pub fn is_primary_key(&self) -> bool {
         self.is_primary_key
+    }
+}
+
+impl<I: Clone, UdtType> Identifiable<I> for CqlColumn<I, UdtType> {
+    fn identifier(&self, keyspace: Option<&CqlIdentifier<I>>) -> CqlQualifiedIdentifier<I> {
+        CqlQualifiedIdentifier::new(keyspace.map(Clone::clone), self.name.clone())
     }
 }

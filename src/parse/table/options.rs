@@ -1,18 +1,20 @@
-use nom::branch::alt;
-use nom::bytes::complete::{tag, tag_no_case};
-use nom::character::complete::multispace0;
-use nom::combinator::{map, opt};
-use nom::error::ParseError;
-use nom::IResult;
-use nom::multi::separated_list1;
-use nom::sequence::delimited;
 use crate::model::identifier::CqlIdentifier;
 use crate::model::order::CqlOrder;
 use crate::model::table::options::CqlTableOptions;
 use crate::parse::Parse;
 use crate::utils::{space0_around, space0_between, space1_before, space1_between, space1_tags};
+use nom::branch::alt;
+use nom::bytes::complete::{tag, tag_no_case};
+use nom::character::complete::multispace0;
+use nom::combinator::{map, opt};
+use nom::error::ParseError;
+use nom::multi::separated_list1;
+use nom::sequence::delimited;
+use nom::IResult;
 
-impl<'de, E: ParseError<&'de str>> Parse<&'de str, E> for CqlTableOptions<&'de str, CqlIdentifier<&'de str>> {
+impl<'de, E: ParseError<&'de str>> Parse<&'de str, E>
+    for CqlTableOptions<&'de str, CqlIdentifier<&'de str>>
+{
     fn parse(input: &'de str) -> IResult<&'de str, Self, E> {
         let mut input = input;
         let mut compact_storage = false;
@@ -41,7 +43,7 @@ impl<'de, E: ParseError<&'de str>> Parse<&'de str, E> for CqlTableOptions<&'de s
                                         )),
                                     ))),
                                 ),
-                                tag(")")
+                                tag(")"),
                             ),
                         )),
                         |order| {
@@ -71,7 +73,9 @@ impl<'de, E: ParseError<&'de str>> Parse<&'de str, E> for CqlTableOptions<&'de s
             input,
             CqlTableOptions::new(
                 compact_storage,
-                clustering_order.map(|(_, clustering_order)| clustering_order).unwrap_or_default(),
+                clustering_order
+                    .map(|(_, clustering_order)| clustering_order)
+                    .unwrap_or_default(),
                 options,
             ),
         ))

@@ -1,7 +1,5 @@
 use nom::error::ParseError;
-use nom::{
-    AsChar, Compare, IResult, InputLength, InputTake, InputTakeAtPosition, Parser,
-};
+use nom::{AsChar, Compare, IResult, InputLength, InputTake, InputTakeAtPosition, Parser};
 
 pub fn space0_around<F: Parser<I, O, E>, I, O, E>(
     mut parser: F,
@@ -232,7 +230,8 @@ pub trait Space0Between<I, O, E> {
     fn space0_between(&mut self, input: I) -> IResult<I, O, E>;
 }
 
-impl<Input, Output, Error: ParseError<Input>, A: Parser<Input, Output, Error>> Space0Between<Input, Output, Error> for (A,)
+impl<Input, Output, Error: ParseError<Input>, A: Parser<Input, Output, Error>>
+    Space0Between<Input, Output, Error> for (A,)
 {
     fn space0_between(&mut self, input: Input) -> IResult<Input, Output, Error> {
         self.0.parse(input)
@@ -338,7 +337,8 @@ pub trait Space1Between<I, O, E> {
     fn space1_between(&mut self, input: I) -> IResult<I, O, E>;
 }
 
-impl<Input, Output, Error: ParseError<Input>, A: Parser<Input, Output, Error>> Space1Between<Input, Output, Error> for (A,)
+impl<Input, Output, Error: ParseError<Input>, A: Parser<Input, Output, Error>>
+    Space1Between<Input, Output, Error> for (A,)
 {
     fn space1_between(&mut self, input: Input) -> IResult<Input, Output, Error> {
         self.0.parse(input)

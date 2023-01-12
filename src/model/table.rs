@@ -1,12 +1,17 @@
 pub mod column;
-pub mod primary_key;
 pub mod options;
+pub mod primary_key;
 
+use crate::model::identifier::CqlIdentifier;
 use crate::model::qualified_identifier::CqlQualifiedIdentifier;
+use crate::model::statement::CqlStatement;
 use crate::model::table::column::CqlColumn;
 use crate::model::table::options::CqlTableOptions;
 use crate::model::table::primary_key::CqlPrimaryKey;
+use crate::model::Identifiable;
 use derive_where::derive_where;
+use std::ops::Deref;
+use std::rc::Rc;
 
 /// The cql table.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
@@ -54,27 +59,27 @@ use derive_where::derive_where;
 /// ) WITH CLUSTERING ORDER BY (mtime DESC);
 /// ```
 #[derive(Debug, Clone)]
-#[derive_where(PartialEq; UdtType, ColumnRef, I: std::ops::Deref<Target = str> + std::cmp::PartialEq)]
-pub struct CqlTable<I, UdtType, ColumnRef> {
+#[derive_where(PartialEq; Column, ColumnRef, I: std::ops::Deref<Target = str> + std::cmp::PartialEq)]
+pub struct CqlTable<I, Column, ColumnRef> {
     /// If the table should only be created if it does not exist.
     if_not_exists: bool,
     /// The name of the table.
     name: CqlQualifiedIdentifier<I>,
     /// The columns of the table.
-    columns: Vec<CqlColumn<I, UdtType>>,
+    columns: Vec<Column>,
     /// The primary key of the table.
-    primary_key: Option<CqlPrimaryKey<I>>,
+    primary_key: Option<CqlPrimaryKey<ColumnRef>>,
     /// The table options.
     options: Option<CqlTableOptions<I, ColumnRef>>,
 }
 
-impl<I, UdtType, ColumnRef> CqlTable<I, UdtType, ColumnRef> {
+impl<I, Column, ColumnRef> CqlTable<I, Column, ColumnRef> {
     /// Creates a new table.
     pub fn new(
         if_not_exists: bool,
         name: CqlQualifiedIdentifier<I>,
-        columns: Vec<CqlColumn<I, UdtType>>,
-        primary_key: Option<CqlPrimaryKey<I>>,
+        columns: Vec<Column>,
+        primary_key: Option<CqlPrimaryKey<ColumnRef>>,
         options: Option<CqlTableOptions<I, ColumnRef>>,
     ) -> Self {
         Self {
@@ -97,17 +102,36 @@ impl<I, UdtType, ColumnRef> CqlTable<I, UdtType, ColumnRef> {
     }
 
     /// Returns the columns of the table.
-    pub fn columns(&self) -> &Vec<CqlColumn<I, UdtType>> {
+    pub fn columns(&self) -> &Vec<Column> {
         &self.columns
     }
 
     /// Returns the primary key of the table.
-    pub fn primary_key(&self) -> Option<&CqlPrimaryKey<I>> {
+    pub fn primary_key(&self) -> Option<&CqlPrimaryKey<ColumnRef>> {
         self.primary_key.as_ref()
     }
 
     /// Returns the table options.
     pub fn options(&self) -> Option<&CqlTableOptions<I, ColumnRef>> {
         self.options.as_ref()
+    }
+
+    /// Wraps referenceable values in an Rc.
+    pub(crate) fn with_rc(self) -> CqlTable<I, Rc<Column>, ColumnRef> {
+        CqlTable {
+            if_not_exists: self.if_not_exists,
+            name: self.name,
+            columns: self.columns.into_iter().map(Rc::new).collect(),
+            primary_key: self.primary_key,
+            options: self.options,
+        }
+    }
+}
+
+impl<I: Clone + Deref<Target = str>, Column, ColumnRef> Identifiable<I>
+    for CqlTable<I, Column, ColumnRef>
+{
+    fn identifier(&self, keyspace: Option<&CqlIdentifier<I>>) -> CqlQualifiedIdentifier<I> {
+        self.name.identifier(keyspace)
     }
 }

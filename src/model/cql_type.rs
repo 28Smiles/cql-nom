@@ -1,3 +1,11 @@
+use crate::model::identifier::CqlIdentifier;
+use crate::model::qualified_identifier::CqlQualifiedIdentifier;
+use crate::model::statement::CqlStatement;
+use crate::model::Identifiable;
+use std::any::TypeId;
+use std::ops::Deref;
+use std::rc::Rc;
+
 /// A CQL Type
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html>
 #[derive(Debug, Clone, PartialEq)]
@@ -56,4 +64,82 @@ pub enum CqlType<UdtType> {
     TUPLE(Vec<CqlType<UdtType>>),
     /// The user defined type is used to indicate that the type is a user defined type.
     UserDefined(UdtType),
+}
+
+impl<UdtType> CqlType<UdtType> {
+    pub(crate) fn reference_udt_types<I, Table>(
+        self,
+        keyspace: Option<&CqlIdentifier<I>>,
+        context: &Vec<CqlStatement<Table, Rc<UdtType>>>,
+    ) -> Result<CqlType<Rc<UdtType>>, CqlQualifiedIdentifier<I>>
+    where
+        I: Deref<Target = str> + Clone,
+        UdtType: Identifiable<I>,
+    {
+        match self {
+            CqlType::ASCII => Ok(CqlType::ASCII),
+            CqlType::BIGINT => Ok(CqlType::BIGINT),
+            CqlType::BLOB => Ok(CqlType::BLOB),
+            CqlType::BOOLEAN => Ok(CqlType::BOOLEAN),
+            CqlType::COUNTER => Ok(CqlType::COUNTER),
+            CqlType::DATE => Ok(CqlType::DATE),
+            CqlType::DECIMAL => Ok(CqlType::DECIMAL),
+            CqlType::DOUBLE => Ok(CqlType::DOUBLE),
+            CqlType::DURATION => Ok(CqlType::DURATION),
+            CqlType::FLOAT => Ok(CqlType::FLOAT),
+            CqlType::INET => Ok(CqlType::INET),
+            CqlType::INT => Ok(CqlType::INT),
+            CqlType::SMALLINT => Ok(CqlType::SMALLINT),
+            CqlType::TEXT => Ok(CqlType::TEXT),
+            CqlType::TIME => Ok(CqlType::TIME),
+            CqlType::TIMESTAMP => Ok(CqlType::TIMESTAMP),
+            CqlType::TIMEUUID => Ok(CqlType::TIMEUUID),
+            CqlType::TINYINT => Ok(CqlType::TINYINT),
+            CqlType::UUID => Ok(CqlType::UUID),
+            CqlType::VARCHAR => Ok(CqlType::VARCHAR),
+            CqlType::VARINT => Ok(CqlType::VARINT),
+            CqlType::FROZEN(udt) => Ok(CqlType::FROZEN(Box::new(
+                udt.reference_udt_types(keyspace, context)?,
+            ))),
+            CqlType::MAP(map) => {
+                let (key, value) = *map;
+                Ok(CqlType::MAP(Box::new((
+                    key.reference_udt_types(keyspace, context)?,
+                    value.reference_udt_types(keyspace, context)?,
+                ))))
+            }
+            CqlType::SET(udt) => {
+                let udt = *udt;
+                Ok(CqlType::SET(Box::new(
+                    udt.reference_udt_types(keyspace, context)?,
+                )))
+            }
+            CqlType::LIST(udt) => {
+                let udt = *udt;
+                Ok(CqlType::LIST(Box::new(
+                    udt.reference_udt_types(keyspace, context)?,
+                )))
+            }
+            CqlType::TUPLE(udts) => Ok(CqlType::TUPLE(
+                udts.into_iter()
+                    .map(|udt| udt.reference_udt_types(keyspace, context))
+                    .collect::<Result<Vec<_>, _>>()?,
+            )),
+            CqlType::UserDefined(udt) => context
+                .iter()
+                .find(|statement| {
+                    statement
+                        .create_user_defined_type()
+                        .map(|udt_definition| {
+                            udt_definition.identifier(keyspace.clone())
+                                == udt.identifier(keyspace.clone())
+                        })
+                        .unwrap_or(false)
+                })
+                .map(|udt_definition| {
+                    CqlType::UserDefined(udt_definition.create_user_defined_type().unwrap().clone())
+                })
+                .ok_or(udt.identifier(keyspace)),
+        }
+    }
 }

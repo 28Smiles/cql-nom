@@ -15,6 +15,28 @@ pub enum CqlIdentifier<I> {
     Quoted(String),
 }
 
+impl<I> CqlIdentifier<I> {
+    /// Creates a new cql identifier.
+    pub fn new(identifier: I) -> Self {
+        Self::Unquoted(identifier)
+    }
+
+    /// Creates a new quoted cql identifier.
+    pub fn new_quoted(identifier: String) -> Self {
+        Self::Quoted(identifier)
+    }
+
+    /// Returns whether the identifier is quoted.
+    pub fn is_quoted(&self) -> bool {
+        matches!(self, Self::Quoted(_))
+    }
+
+    /// Returns whether the identifier is unquoted.
+    pub fn is_unquoted(&self) -> bool {
+        matches!(self, Self::Unquoted(_))
+    }
+}
+
 impl<I: Deref<Target = str>> PartialEq for CqlIdentifier<I> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {

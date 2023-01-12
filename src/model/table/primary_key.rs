@@ -1,20 +1,16 @@
-use crate::model::identifier::CqlIdentifier;
-use derive_where::derive_where;
-
 /// The cql primary key.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
-#[derive(Debug, Clone)]
-#[derive_where(PartialEq; I: std::ops::Deref<Target = str>)]
-pub struct CqlPrimaryKey<I> {
+#[derive(Debug, Clone, PartialEq)]
+pub struct CqlPrimaryKey<ColumnRef> {
     /// The partition key.
-    partition_key: Vec<CqlIdentifier<I>>,
+    partition_key: Vec<ColumnRef>,
     /// The clustering columns.
-    clustering_columns: Vec<CqlIdentifier<I>>,
+    clustering_columns: Vec<ColumnRef>,
 }
 
-impl<I> CqlPrimaryKey<I> {
+impl<ColumnRef> CqlPrimaryKey<ColumnRef> {
     /// Creates a new primary key.
-    pub fn new(partition_key: Vec<CqlIdentifier<I>>, clustering_columns: Vec<CqlIdentifier<I>>) -> Self {
+    pub fn new(partition_key: Vec<ColumnRef>, clustering_columns: Vec<ColumnRef>) -> Self {
         Self {
             partition_key,
             clustering_columns,
@@ -22,12 +18,12 @@ impl<I> CqlPrimaryKey<I> {
     }
 
     /// Returns the partition key.
-    pub fn partition_key(&self) -> &Vec<CqlIdentifier<I>> {
+    pub fn partition_key(&self) -> &Vec<ColumnRef> {
         &self.partition_key
     }
 
     /// Returns the clustering columns.
-    pub fn clustering_columns(&self) -> &Vec<CqlIdentifier<I>> {
+    pub fn clustering_columns(&self) -> &Vec<ColumnRef> {
         &self.clustering_columns
     }
 }

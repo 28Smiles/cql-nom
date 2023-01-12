@@ -13,7 +13,11 @@ pub struct CqlTableOptions<T, ColumnRef> {
 
 impl<T, ColumnRef> CqlTableOptions<T, ColumnRef> {
     /// Creates a new cql table options.
-    pub fn new(compact_storage: bool, clustering_order: Vec<(ColumnRef, CqlOrder)>, options: Vec<(T, T)>) -> Self {
+    pub fn new(
+        compact_storage: bool,
+        clustering_order: Vec<(ColumnRef, CqlOrder)>,
+        options: Vec<(T, T)>,
+    ) -> Self {
         Self {
             compact_storage,
             clustering_order,

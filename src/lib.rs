@@ -18,20 +18,35 @@
 //!
 //! The code is available on [GitHub](https://github.com/28Smiles/cql-nom).
 
-use nom::bytes::complete::tag;
-use nom::IResult;
-use nom::multi::separated_list0;
 use crate::model::identifier::CqlIdentifier;
 use crate::model::statement::CqlStatement;
+use crate::model::table::column::CqlColumn;
+use crate::model::table::CqlTable;
+use crate::model::user_defined_type::CqlUserDefinedType;
 use crate::parse::Parse;
 use crate::utils::space0_around;
+use nom::bytes::complete::tag;
+use nom::multi::separated_list0;
+use nom::IResult;
 
 pub mod error;
 pub mod model;
 mod parse;
 mod utils;
-mod ast;
 
-pub fn parse_cql(input: &str) -> IResult<&str, Vec<CqlStatement<&str, CqlIdentifier<&str>, CqlIdentifier<&str>>>> {
-    space0_around(separated_list0(tag(";"), space0_around(CqlStatement::parse)))(input)
+pub fn parse_cql(
+    input: &str,
+) -> IResult<
+    &str,
+    Vec<
+        CqlStatement<
+            CqlTable<&str, CqlColumn<&str, CqlIdentifier<&str>>, CqlIdentifier<&str>>,
+            CqlUserDefinedType<&str, CqlIdentifier<&str>>,
+        >,
+    >,
+> {
+    space0_around(separated_list0(
+        tag(";"),
+        space0_around(CqlStatement::parse),
+    ))(input)
 }

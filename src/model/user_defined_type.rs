@@ -1,7 +1,11 @@
 use crate::model::cql_type::CqlType;
 use crate::model::identifier::CqlIdentifier;
 use crate::model::qualified_identifier::CqlQualifiedIdentifier;
+use crate::model::statement::CqlStatement;
+use crate::model::Identifiable;
 use derive_where::derive_where;
+use std::ops::Deref;
+use std::rc::Rc;
 
 /// User-defined type.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#user-defined-types>
@@ -64,5 +68,39 @@ impl<I, UdtType> CqlUserDefinedType<I, UdtType> {
     /// Returns the fields of the user-defined type.
     pub fn fields(&self) -> &Vec<(CqlIdentifier<I>, CqlType<UdtType>)> {
         &self.fields
+    }
+}
+
+impl<I: Clone + Deref<Target = str>, UdtType> Identifiable<I> for CqlUserDefinedType<I, UdtType> {
+    fn identifier(&self, keyspace: Option<&CqlIdentifier<I>>) -> CqlQualifiedIdentifier<I> {
+        self.name.identifier(keyspace)
+    }
+}
+
+impl<I, UdtType> CqlUserDefinedType<I, UdtType> {
+    pub(crate) fn reference_udt_types<Table>(
+        self,
+        keyspace: Option<&CqlIdentifier<I>>,
+        context: &Vec<CqlStatement<Table, Rc<UdtType>>>,
+    ) -> Result<CqlUserDefinedType<I, Rc<UdtType>>, CqlQualifiedIdentifier<I>>
+    where
+        I: Deref<Target = str> + Clone,
+        UdtType: Identifiable<I>,
+    {
+        let keyspace = self.name.keyspace().or(keyspace);
+        let fields = self
+            .fields
+            .into_iter()
+            .map(|(name, cql_type)| {
+                cql_type
+                    .reference_udt_types(keyspace, context)
+                    .map(|cql_type| (name, cql_type))
+            })
+            .collect::<Result<Vec<_>, CqlQualifiedIdentifier<I>>>()?;
+        Ok(CqlUserDefinedType::new(
+            self.if_not_exists,
+            self.name,
+            fields,
+        ))
     }
 }

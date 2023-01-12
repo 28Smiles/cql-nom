@@ -9,6 +9,7 @@ docsrs = []
 [dependencies]
 nom = "7"
 uuid = "1"
+derive-where = "1"
 
 [package.metadata.docs.rs]
 features = ["docsrs"]

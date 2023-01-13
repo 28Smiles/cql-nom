@@ -1,12 +1,12 @@
-use std::ops::Deref;
-use std::rc::Rc;
-use derive_new::new;
-use getset::{CopyGetters, Getters};
-use crate::model::Identifiable;
 use crate::model::identifier::CqlIdentifier;
 use crate::model::order::CqlOrder;
 use crate::model::qualified_identifier::CqlQualifiedIdentifier;
 use crate::model::table::column::CqlColumn;
+use crate::model::Identifiable;
+use derive_new::new;
+use getset::{CopyGetters, Getters};
+use std::ops::Deref;
+use std::rc::Rc;
 
 /// The cql table options.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
@@ -29,14 +29,20 @@ impl<I, ColumnRef> CqlTableOptions<I, ColumnRef> {
         keyspace: Option<&CqlIdentifier<I>>,
         table_context: &Vec<Rc<CqlColumn<I, Rc<UdtType>>>>,
     ) -> Result<CqlTableOptions<I, Rc<CqlColumn<I, Rc<UdtType>>>>, CqlQualifiedIdentifier<I>>
-        where
-            I: Deref<Target = str> + Clone,
-            ColumnRef: Identifiable<I>,
+    where
+        I: Deref<Target = str> + Clone,
+        ColumnRef: Identifiable<I>,
     {
-        let clustering_order = self.clustering_order.into_iter()
+        let clustering_order = self
+            .clustering_order
+            .into_iter()
             .map(|(column, order)| {
-                table_context.iter()
-                    .find(|c| c.contextualized_identifier(keyspace) == column.contextualized_identifier(keyspace))
+                table_context
+                    .iter()
+                    .find(|c| {
+                        c.contextualized_identifier(keyspace)
+                            == column.contextualized_identifier(keyspace)
+                    })
                     .map(|column| (Rc::clone(column), order))
                     .ok_or_else(|| column.contextualized_identifier(keyspace))
             })

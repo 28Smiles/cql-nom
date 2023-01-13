@@ -1,13 +1,13 @@
-use std::ops::Deref;
-use std::rc::Rc;
-use derive_new::new;
 use crate::model::cql_type::CqlType;
 use crate::model::identifier::CqlIdentifier;
 use crate::model::qualified_identifier::CqlQualifiedIdentifier;
+use crate::model::statement::CqlStatement;
 use crate::model::Identifiable;
+use derive_new::new;
 use derive_where::derive_where;
 use getset::{CopyGetters, Getters};
-use crate::model::statement::CqlStatement;
+use std::ops::Deref;
+use std::rc::Rc;
 
 /// The cql column.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
@@ -44,10 +44,10 @@ impl<I, UdtTypeRef> CqlColumn<I, UdtTypeRef> {
         keyspace: Option<&CqlIdentifier<I>>,
         context: &Vec<CqlStatement<Table, Rc<UdtType>>>,
     ) -> Result<CqlColumn<I, Rc<UdtType>>, CqlQualifiedIdentifier<I>>
-        where
-            I: Deref<Target = str> + Clone,
-            UdtTypeRef: Identifiable<I>,
-            UdtType: Identifiable<I>,
+    where
+        I: Deref<Target = str> + Clone,
+        UdtTypeRef: Identifiable<I>,
+        UdtType: Identifiable<I>,
     {
         Ok(CqlColumn::new(
             self.name,
@@ -57,4 +57,3 @@ impl<I, UdtTypeRef> CqlColumn<I, UdtTypeRef> {
         ))
     }
 }
-

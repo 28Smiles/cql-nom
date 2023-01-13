@@ -1,6 +1,6 @@
-use std::ops::Deref;
-use derive_more::{IsVariant, Unwrap};
 use crate::model::Identifiable;
+use derive_more::{IsVariant, Unwrap};
+use std::ops::Deref;
 
 /// Cql Identifier.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#identifiers>

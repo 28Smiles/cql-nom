@@ -2,9 +2,9 @@ use crate::model::identifier::CqlIdentifier;
 use crate::model::qualified_identifier::CqlQualifiedIdentifier;
 use crate::model::statement::CqlStatement;
 use crate::model::Identifiable;
+use derive_more::{IsVariant, Unwrap};
 use std::ops::Deref;
 use std::rc::Rc;
-use derive_more::{IsVariant, Unwrap};
 
 /// A CQL Type
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html>

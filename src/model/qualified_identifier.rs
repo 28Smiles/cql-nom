@@ -1,8 +1,8 @@
 use crate::model::identifier::CqlIdentifier;
 use crate::model::Identifiable;
-use std::ops::Deref;
 use derive_new::new;
 use getset::Getters;
+use std::ops::Deref;
 
 #[derive(Debug, Clone, new, Getters)]
 pub struct CqlQualifiedIdentifier<I> {

@@ -71,7 +71,9 @@ impl<I, UdtTypeRef> ParsedCqlUserDefinedType<I, UdtTypeRef> {
     }
 }
 
-impl<I: Clone + Deref<Target = str>, UdtTypeRef> Identifiable<I> for ParsedCqlUserDefinedType<I, UdtTypeRef> {
+impl<I: Clone + Deref<Target = str>, UdtTypeRef> Identifiable<I>
+    for ParsedCqlUserDefinedType<I, UdtTypeRef>
+{
     fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
         self.name.keyspace()
     }
@@ -87,9 +89,9 @@ impl<I, UdtTypeRef> ParsedCqlUserDefinedType<I, UdtTypeRef> {
         keyspace: Option<&CqlIdentifier<I>>,
         context: &Vec<CqlStatement<Table, Rc<CqlUserDefinedType<I>>>>,
     ) -> Result<CqlUserDefinedType<I>, CqlQualifiedIdentifier<I>>
-        where
-            I: Deref<Target = str> + Clone,
-            UdtTypeRef: Identifiable<I>,
+    where
+        I: Deref<Target = str> + Clone,
+        UdtTypeRef: Identifiable<I>,
     {
         let keyspace = self.name.keyspace().or(keyspace);
         let fields = self

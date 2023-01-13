@@ -43,6 +43,9 @@ impl<'de, E: ParseError<&'de str>> Parse<&'de str, E>
         let (input, fields) =
             delimited(tag("("), separated_list0(tag(","), parse_field), tag(")"))(input)?;
 
-        Ok((input, ParsedCqlUserDefinedType::new(if_not_exists, name, fields)))
+        Ok((
+            input,
+            ParsedCqlUserDefinedType::new(if_not_exists, name, fields),
+        ))
     }
 }

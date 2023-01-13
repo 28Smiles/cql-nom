@@ -8,11 +8,11 @@ use crate::model::statement::CqlStatement;
 use crate::model::table::column::CqlColumn;
 use crate::model::table::options::CqlTableOptions;
 use crate::model::table::primary_key::CqlPrimaryKey;
+use crate::model::user_defined_type::CqlUserDefinedType;
 use crate::model::Identifiable;
 use derive_where::derive_where;
 use std::ops::Deref;
 use std::rc::Rc;
-use crate::model::user_defined_type::CqlUserDefinedType;
 
 /// The cql table.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
@@ -138,27 +138,31 @@ impl<I, UdtTypeRef, ColumnRef> CqlTable<I, CqlColumn<I, UdtTypeRef>, ColumnRef> 
         CqlTable<
             I,
             Rc<CqlColumn<I, Rc<CqlUserDefinedType<I>>>>,
-            Rc<CqlColumn<I, Rc<CqlUserDefinedType<I>>>>
+            Rc<CqlColumn<I, Rc<CqlUserDefinedType<I>>>>,
         >,
-        CqlQualifiedIdentifier<I>
+        CqlQualifiedIdentifier<I>,
     >
-        where
-            I: Deref<Target = str> + Clone,
-            ColumnRef: Identifiable<I>,
-            UdtTypeRef: Identifiable<I>,
+    where
+        I: Deref<Target = str> + Clone,
+        ColumnRef: Identifiable<I>,
+        UdtTypeRef: Identifiable<I>,
     {
         let keyspace = self.name.contextualized_keyspace(keyspace);
-        let columns = self.columns
+        let columns = self
+            .columns
             .into_iter()
             .map(|column| {
-                column.reference_types(keyspace.as_ref(), context)
+                column
+                    .reference_types(keyspace.as_ref(), context)
                     .map(Rc::new)
             })
             .collect::<Result<Vec<_>, _>>()?;
-        let primary_key = self.primary_key
+        let primary_key = self
+            .primary_key
             .map(|primary_key| primary_key.reference_types(keyspace.as_ref(), &columns))
             .transpose()?;
-        let options = self.options
+        let options = self
+            .options
             .map(|options| options.reference_types(keyspace.as_ref(), &columns))
             .transpose()?;
 

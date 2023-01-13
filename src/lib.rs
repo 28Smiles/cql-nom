@@ -18,8 +18,8 @@
 //!
 //! The code is available on [GitHub](https://github.com/28Smiles/cql-nom).
 
-use std::rc::Rc;
 use crate::model::identifier::CqlIdentifier;
+use crate::model::qualified_identifier::CqlQualifiedIdentifier;
 use crate::model::statement::CqlStatement;
 use crate::model::table::column::CqlColumn;
 use crate::model::table::CqlTable;
@@ -29,7 +29,7 @@ use crate::utils::space0_around;
 use nom::bytes::complete::tag;
 use nom::multi::separated_list0;
 use nom::IResult;
-use crate::model::qualified_identifier::CqlQualifiedIdentifier;
+use std::rc::Rc;
 
 pub mod error;
 pub mod model;
@@ -62,10 +62,18 @@ pub fn parse_tree_to_ast<'a>(
     >,
     keyspace: Option<&'a CqlIdentifier<&'a str>>,
 ) -> Result<
-    Vec<CqlStatement<
-        Rc<CqlTable<&'a str, Rc<CqlColumn<&'a str, Rc<CqlUserDefinedType<&'a str>>>>, Rc<CqlColumn<&'a str, Rc<CqlUserDefinedType<&'a str>>>>>>,
-        Rc<CqlUserDefinedType<&'a str>>,
-    >>,
+    Vec<
+        CqlStatement<
+            Rc<
+                CqlTable<
+                    &'a str,
+                    Rc<CqlColumn<&'a str, Rc<CqlUserDefinedType<&'a str>>>>,
+                    Rc<CqlColumn<&'a str, Rc<CqlUserDefinedType<&'a str>>>>,
+                >,
+            >,
+            Rc<CqlUserDefinedType<&'a str>>,
+        >,
+    >,
     CqlQualifiedIdentifier<&'a str>,
 > {
     let mut result = Vec::new();

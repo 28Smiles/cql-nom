@@ -3,7 +3,6 @@ name: CI
 on: [push, pull_request]
 
 env:
-  RUST_MINVERSION: 1.57.0
   CARGO_INCREMENTAL: 0
   CARGO_NET_RETRY: 10
 
@@ -18,7 +17,7 @@ jobs:
           - stable
           - beta
           - nightly
-          - ${{ env.RUST_MINVERSION }}
+          - 1.57.0
 
         features:
           - ''

@@ -64,7 +64,7 @@ where
     }
 }
 
-pub fn space1_tags<const TAGS: usize, T, Input, Error: ParseError<Input>>(
+pub fn space1_tags<T, Input, Error: ParseError<Input>, const TAGS: usize>(
     tags: [T; TAGS],
 ) -> impl Fn(Input) -> IResult<Input, [Input; TAGS], Error>
 where
@@ -92,7 +92,7 @@ where
     }
 }
 
-pub fn space0_tags<const TAGS: usize, T, Input, Error: ParseError<Input>>(
+pub fn space0_tags<T, Input, Error: ParseError<Input>, const TAGS: usize>(
     tags: [T; TAGS],
 ) -> impl Fn(Input) -> IResult<Input, [Input; TAGS], Error>
 where
@@ -120,7 +120,7 @@ where
     }
 }
 
-pub fn space1_tags_no_case<const TAGS: usize, T, Input, Error: ParseError<Input>>(
+pub fn space1_tags_no_case<T, Input, Error: ParseError<Input>, const TAGS: usize>(
     tags: [T; TAGS],
 ) -> impl Fn(Input) -> IResult<Input, [Input; TAGS], Error>
 where
@@ -148,7 +148,7 @@ where
     }
 }
 
-pub fn space0_tags_no_case<const TAGS: usize, T, Input, Error: ParseError<Input>>(
+pub fn space0_tags_no_case<T, Input, Error: ParseError<Input>, const TAGS: usize>(
     tags: [T; TAGS],
 ) -> impl Fn(Input) -> IResult<Input, [Input; TAGS], Error>
 where

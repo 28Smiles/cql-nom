@@ -12,6 +12,7 @@ use crate::model::Identifiable;
 use derive_where::derive_where;
 use std::ops::Deref;
 use std::rc::Rc;
+use crate::model::user_defined_type::CqlUserDefinedType;
 
 /// The cql table.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
@@ -115,23 +116,58 @@ impl<I, Column, ColumnRef> CqlTable<I, Column, ColumnRef> {
     pub fn options(&self) -> Option<&CqlTableOptions<I, ColumnRef>> {
         self.options.as_ref()
     }
-
-    /// Wraps referenceable values in an Rc.
-    pub(crate) fn with_rc(self) -> CqlTable<I, Rc<Column>, ColumnRef> {
-        CqlTable {
-            if_not_exists: self.if_not_exists,
-            name: self.name,
-            columns: self.columns.into_iter().map(Rc::new).collect(),
-            primary_key: self.primary_key,
-            options: self.options,
-        }
-    }
 }
 
 impl<I: Clone + Deref<Target = str>, Column, ColumnRef> Identifiable<I>
     for CqlTable<I, Column, ColumnRef>
 {
-    fn identifier(&self, keyspace: Option<&CqlIdentifier<I>>) -> CqlQualifiedIdentifier<I> {
-        self.name.identifier(keyspace)
+    fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
+        self.name.keyspace()
+    }
+    fn identifier(&self) -> &CqlIdentifier<I> {
+        self.name.identifier()
+    }
+}
+
+impl<I, UdtTypeRef, ColumnRef> CqlTable<I, CqlColumn<I, UdtTypeRef>, ColumnRef> {
+    pub(crate) fn reference_types<Table>(
+        self,
+        keyspace: Option<&CqlIdentifier<I>>,
+        context: &Vec<CqlStatement<Table, Rc<CqlUserDefinedType<I>>>>,
+    ) -> Result<
+        CqlTable<
+            I,
+            Rc<CqlColumn<I, Rc<CqlUserDefinedType<I>>>>,
+            Rc<CqlColumn<I, Rc<CqlUserDefinedType<I>>>>
+        >,
+        CqlQualifiedIdentifier<I>
+    >
+        where
+            I: Deref<Target = str> + Clone,
+            ColumnRef: Identifiable<I>,
+            UdtTypeRef: Identifiable<I>,
+    {
+        let keyspace = self.name.contextualized_keyspace(keyspace);
+        let columns = self.columns
+            .into_iter()
+            .map(|column| {
+                column.reference_types(keyspace.as_ref(), context)
+                    .map(Rc::new)
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        let primary_key = self.primary_key
+            .map(|primary_key| primary_key.reference_types(keyspace.as_ref(), &columns))
+            .transpose()?;
+        let options = self.options
+            .map(|options| options.reference_types(keyspace.as_ref(), &columns))
+            .transpose()?;
+
+        Ok(CqlTable::new(
+            self.if_not_exists,
+            self.name,
+            columns,
+            primary_key,
+            options,
+        ))
     }
 }

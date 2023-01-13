@@ -1,8 +1,11 @@
+use std::ops::Deref;
+use std::rc::Rc;
 use crate::model::cql_type::CqlType;
 use crate::model::identifier::CqlIdentifier;
 use crate::model::qualified_identifier::CqlQualifiedIdentifier;
 use crate::model::Identifiable;
 use derive_where::derive_where;
+use crate::model::statement::CqlStatement;
 
 /// The cql column.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
@@ -57,7 +60,32 @@ impl<I, UdtType> CqlColumn<I, UdtType> {
 }
 
 impl<I: Clone, UdtType> Identifiable<I> for CqlColumn<I, UdtType> {
-    fn identifier(&self, keyspace: Option<&CqlIdentifier<I>>) -> CqlQualifiedIdentifier<I> {
-        CqlQualifiedIdentifier::new(keyspace.map(Clone::clone), self.name.clone())
+    fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
+        None
+    }
+
+    fn identifier(&self) -> &CqlIdentifier<I> {
+        &self.name
     }
 }
+
+impl<I, UdtTypeRef> CqlColumn<I, UdtTypeRef> {
+    pub(crate) fn reference_types<Table, UdtType>(
+        self,
+        keyspace: Option<&CqlIdentifier<I>>,
+        context: &Vec<CqlStatement<Table, Rc<UdtType>>>,
+    ) -> Result<CqlColumn<I, Rc<UdtType>>, CqlQualifiedIdentifier<I>>
+        where
+            I: Deref<Target = str> + Clone,
+            UdtTypeRef: Identifiable<I>,
+            UdtType: Identifiable<I>,
+    {
+        Ok(CqlColumn::new(
+            self.name,
+            self.cql_type.reference_types(keyspace, context)?,
+            self.is_static,
+            self.is_primary_key,
+        ))
+    }
+}
+

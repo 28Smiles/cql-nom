@@ -29,13 +29,11 @@ impl<I: Deref<Target = str>> PartialEq for CqlQualifiedIdentifier<I> {
 }
 
 impl<I: Clone + Deref<Target = str>> Identifiable<I> for CqlQualifiedIdentifier<I> {
-    fn identifier(&self, keyspace: Option<&CqlIdentifier<I>>) -> CqlQualifiedIdentifier<I> {
-        if let Some(keyspace) = &self.keyspace {
-            // The identifier already has a keyspace.
-            CqlQualifiedIdentifier::new(Some(keyspace.clone()), self.name.clone())
-        } else {
-            // The identifier does not have a keyspace.
-            CqlQualifiedIdentifier::new(keyspace.map(Clone::clone), self.name.clone())
-        }
+    fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
+        self.keyspace.as_ref()
+    }
+
+    fn identifier(&self) -> &CqlIdentifier<I> {
+        &self.name
     }
 }

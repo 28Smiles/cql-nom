@@ -2,7 +2,6 @@ use crate::model::identifier::CqlIdentifier;
 use crate::model::qualified_identifier::CqlQualifiedIdentifier;
 use crate::model::statement::CqlStatement;
 use crate::model::Identifiable;
-use std::any::TypeId;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -66,14 +65,15 @@ pub enum CqlType<UdtType> {
     UserDefined(UdtType),
 }
 
-impl<UdtType> CqlType<UdtType> {
-    pub(crate) fn reference_udt_types<I, Table>(
+impl<UdtTypeRef> CqlType<UdtTypeRef> {
+    pub(crate) fn reference_types<I, Table, UdtType>(
         self,
         keyspace: Option<&CqlIdentifier<I>>,
         context: &Vec<CqlStatement<Table, Rc<UdtType>>>,
     ) -> Result<CqlType<Rc<UdtType>>, CqlQualifiedIdentifier<I>>
     where
         I: Deref<Target = str> + Clone,
+        UdtTypeRef: Identifiable<I>,
         UdtType: Identifiable<I>,
     {
         match self {
@@ -99,30 +99,30 @@ impl<UdtType> CqlType<UdtType> {
             CqlType::VARCHAR => Ok(CqlType::VARCHAR),
             CqlType::VARINT => Ok(CqlType::VARINT),
             CqlType::FROZEN(udt) => Ok(CqlType::FROZEN(Box::new(
-                udt.reference_udt_types(keyspace, context)?,
+                udt.reference_types(keyspace, context)?,
             ))),
             CqlType::MAP(map) => {
                 let (key, value) = *map;
                 Ok(CqlType::MAP(Box::new((
-                    key.reference_udt_types(keyspace, context)?,
-                    value.reference_udt_types(keyspace, context)?,
+                    key.reference_types(keyspace, context)?,
+                    value.reference_types(keyspace, context)?,
                 ))))
             }
             CqlType::SET(udt) => {
                 let udt = *udt;
                 Ok(CqlType::SET(Box::new(
-                    udt.reference_udt_types(keyspace, context)?,
+                    udt.reference_types(keyspace, context)?,
                 )))
             }
             CqlType::LIST(udt) => {
                 let udt = *udt;
                 Ok(CqlType::LIST(Box::new(
-                    udt.reference_udt_types(keyspace, context)?,
+                    udt.reference_types(keyspace, context)?,
                 )))
             }
             CqlType::TUPLE(udts) => Ok(CqlType::TUPLE(
                 udts.into_iter()
-                    .map(|udt| udt.reference_udt_types(keyspace, context))
+                    .map(|udt| udt.reference_types(keyspace, context))
                     .collect::<Result<Vec<_>, _>>()?,
             )),
             CqlType::UserDefined(udt) => context
@@ -131,15 +131,15 @@ impl<UdtType> CqlType<UdtType> {
                     statement
                         .create_user_defined_type()
                         .map(|udt_definition| {
-                            udt_definition.identifier(keyspace.clone())
-                                == udt.identifier(keyspace.clone())
+                            udt_definition.contextualized_identifier(keyspace.clone())
+                                == udt.contextualized_identifier(keyspace.clone())
                         })
                         .unwrap_or(false)
                 })
                 .map(|udt_definition| {
                     CqlType::UserDefined(udt_definition.create_user_defined_type().unwrap().clone())
                 })
-                .ok_or(udt.identifier(keyspace)),
+                .ok_or(udt.contextualized_identifier(keyspace)),
         }
     }
 }

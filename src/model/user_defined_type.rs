@@ -32,21 +32,21 @@ use std::rc::Rc;
 /// );
 /// ```
 #[derive(Debug, Clone)]
-#[derive_where(PartialEq; UdtType, I: std::ops::Deref<Target = str> + std::cmp::PartialEq)]
-pub struct CqlUserDefinedType<I, UdtType> {
+#[derive_where(PartialEq; UdtTypeRef, I: std::ops::Deref<Target = str> + std::cmp::PartialEq)]
+pub struct ParsedCqlUserDefinedType<I, UdtTypeRef> {
     if_not_exists: bool,
     /// The name of the user-defined type.
     name: CqlQualifiedIdentifier<I>,
     /// The fields of the user-defined type.
-    fields: Vec<(CqlIdentifier<I>, CqlType<UdtType>)>,
+    fields: Vec<(CqlIdentifier<I>, CqlType<UdtTypeRef>)>,
 }
 
-impl<I, UdtType> CqlUserDefinedType<I, UdtType> {
+impl<I, UdtTypeRef> ParsedCqlUserDefinedType<I, UdtTypeRef> {
     /// Creates a new user-defined type.
     pub fn new(
         if_not_exists: bool,
         name: CqlQualifiedIdentifier<I>,
-        fields: Vec<(CqlIdentifier<I>, CqlType<UdtType>)>,
+        fields: Vec<(CqlIdentifier<I>, CqlType<UdtTypeRef>)>,
     ) -> Self {
         Self {
             if_not_exists,
@@ -66,26 +66,30 @@ impl<I, UdtType> CqlUserDefinedType<I, UdtType> {
     }
 
     /// Returns the fields of the user-defined type.
-    pub fn fields(&self) -> &Vec<(CqlIdentifier<I>, CqlType<UdtType>)> {
+    pub fn fields(&self) -> &Vec<(CqlIdentifier<I>, CqlType<UdtTypeRef>)> {
         &self.fields
     }
 }
 
-impl<I: Clone + Deref<Target = str>, UdtType> Identifiable<I> for CqlUserDefinedType<I, UdtType> {
-    fn identifier(&self, keyspace: Option<&CqlIdentifier<I>>) -> CqlQualifiedIdentifier<I> {
-        self.name.identifier(keyspace)
+impl<I: Clone + Deref<Target = str>, UdtTypeRef> Identifiable<I> for ParsedCqlUserDefinedType<I, UdtTypeRef> {
+    fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
+        self.name.keyspace()
+    }
+
+    fn identifier(&self) -> &CqlIdentifier<I> {
+        self.name.identifier()
     }
 }
 
-impl<I, UdtType> CqlUserDefinedType<I, UdtType> {
-    pub(crate) fn reference_udt_types<Table>(
+impl<I, UdtTypeRef> ParsedCqlUserDefinedType<I, UdtTypeRef> {
+    pub(crate) fn reference_types<Table>(
         self,
         keyspace: Option<&CqlIdentifier<I>>,
-        context: &Vec<CqlStatement<Table, Rc<UdtType>>>,
-    ) -> Result<CqlUserDefinedType<I, Rc<UdtType>>, CqlQualifiedIdentifier<I>>
-    where
-        I: Deref<Target = str> + Clone,
-        UdtType: Identifiable<I>,
+        context: &Vec<CqlStatement<Table, Rc<CqlUserDefinedType<I>>>>,
+    ) -> Result<CqlUserDefinedType<I>, CqlQualifiedIdentifier<I>>
+        where
+            I: Deref<Target = str> + Clone,
+            UdtTypeRef: Identifiable<I>,
     {
         let keyspace = self.name.keyspace().or(keyspace);
         let fields = self
@@ -93,7 +97,7 @@ impl<I, UdtType> CqlUserDefinedType<I, UdtType> {
             .into_iter()
             .map(|(name, cql_type)| {
                 cql_type
-                    .reference_udt_types(keyspace, context)
+                    .reference_types(keyspace, context)
                     .map(|cql_type| (name, cql_type))
             })
             .collect::<Result<Vec<_>, CqlQualifiedIdentifier<I>>>()?;
@@ -102,5 +106,55 @@ impl<I, UdtType> CqlUserDefinedType<I, UdtType> {
             self.name,
             fields,
         ))
+    }
+}
+
+#[derive(Debug, Clone)]
+#[derive_where(PartialEq; I: std::ops::Deref<Target = str> + std::cmp::PartialEq)]
+pub struct CqlUserDefinedType<I> {
+    if_not_exists: bool,
+    /// The name of the user-defined type.
+    name: CqlQualifiedIdentifier<I>,
+    /// The fields of the user-defined type.
+    fields: Vec<(CqlIdentifier<I>, CqlType<Rc<CqlUserDefinedType<I>>>)>,
+}
+
+impl<I> CqlUserDefinedType<I> {
+    /// Creates a new user-defined type.
+    pub fn new(
+        if_not_exists: bool,
+        name: CqlQualifiedIdentifier<I>,
+        fields: Vec<(CqlIdentifier<I>, CqlType<Rc<CqlUserDefinedType<I>>>)>,
+    ) -> Self {
+        Self {
+            if_not_exists,
+            name,
+            fields,
+        }
+    }
+
+    /// Returns true if the user-defined type should only be created if it does not exist.
+    pub fn if_not_exists(&self) -> bool {
+        self.if_not_exists
+    }
+
+    /// Returns the name of the user-defined type.
+    pub fn name(&self) -> &CqlQualifiedIdentifier<I> {
+        &self.name
+    }
+
+    /// Returns the fields of the user-defined type.
+    pub fn fields(&self) -> &Vec<(CqlIdentifier<I>, CqlType<Rc<CqlUserDefinedType<I>>>)> {
+        &self.fields
+    }
+}
+
+impl<I: Clone + Deref<Target = str>> Identifiable<I> for CqlUserDefinedType<I> {
+    fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
+        self.name.keyspace()
+    }
+
+    fn identifier(&self) -> &CqlIdentifier<I> {
+        self.name.identifier()
     }
 }

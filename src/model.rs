@@ -9,6 +9,22 @@ pub mod statement;
 pub mod table;
 pub mod user_defined_type;
 
-pub trait Identifiable<I> {
-    fn identifier(&self, keyspace: Option<&CqlIdentifier<I>>) -> CqlQualifiedIdentifier<I>;
+pub trait Identifiable<I: Clone> {
+    fn keyspace(&self) -> Option<&CqlIdentifier<I>>;
+    fn identifier(&self) -> &CqlIdentifier<I>;
+    fn contextualized_keyspace(&self, keyspace: Option<&CqlIdentifier<I>>) -> Option<CqlIdentifier<I>> {
+        if let Some(keyspace) = self.keyspace() {
+            // The identifier already has a keyspace.
+            Some(keyspace.clone())
+        } else {
+            // The identifier does not have a keyspace.
+            keyspace.cloned()
+        }
+    }
+    fn contextualized_identifier(&self, keyspace: Option<&CqlIdentifier<I>>) -> CqlQualifiedIdentifier<I> {
+        CqlQualifiedIdentifier::new(
+            self.contextualized_keyspace(keyspace),
+            self.identifier().clone(),
+        )
+    }
 }

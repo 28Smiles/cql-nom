@@ -1,4 +1,5 @@
 use std::ops::Deref;
+use crate::model::Identifiable;
 
 /// Cql Identifier.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html#identifiers>
@@ -56,5 +57,15 @@ impl<I: Deref<Target = str>> Deref for CqlIdentifier<I> {
             CqlIdentifier::Unquoted(s) => s.deref(),
             CqlIdentifier::Quoted(s) => s,
         }
+    }
+}
+
+impl<I: Clone + Deref<Target = str>> Identifiable<I> for CqlIdentifier<I> {
+    fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
+        None
+    }
+
+    fn identifier(&self) -> &CqlIdentifier<I> {
+        &self
     }
 }

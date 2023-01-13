@@ -1,7 +1,7 @@
 use crate::model::cql_type::CqlType;
 use crate::model::identifier::CqlIdentifier;
 use crate::model::qualified_identifier::CqlQualifiedIdentifier;
-use crate::model::user_defined_type::CqlUserDefinedType;
+use crate::model::user_defined_type::ParsedCqlUserDefinedType;
 use crate::parse::Parse;
 use crate::utils::{space1_before, space1_tags_no_case};
 use nom::bytes::complete::tag;
@@ -13,7 +13,7 @@ use nom::sequence::delimited;
 use nom::IResult;
 
 impl<'de, E: ParseError<&'de str>> Parse<&'de str, E>
-    for CqlUserDefinedType<&'de str, CqlIdentifier<&'de str>>
+    for ParsedCqlUserDefinedType<&'de str, CqlIdentifier<&'de str>>
 {
     fn parse(input: &'de str) -> IResult<&'de str, Self, E> {
         let (input, _) = space1_tags_no_case(["CREATE", "TYPE"])(input)?;
@@ -43,6 +43,6 @@ impl<'de, E: ParseError<&'de str>> Parse<&'de str, E>
         let (input, fields) =
             delimited(tag("("), separated_list0(tag(","), parse_field), tag(")"))(input)?;
 
-        Ok((input, CqlUserDefinedType::new(if_not_exists, name, fields)))
+        Ok((input, ParsedCqlUserDefinedType::new(if_not_exists, name, fields)))
     }
 }

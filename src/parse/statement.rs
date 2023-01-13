@@ -7,18 +7,18 @@ use crate::model::identifier::CqlIdentifier;
 use crate::model::statement::CqlStatement;
 use crate::model::table::column::CqlColumn;
 use crate::model::table::CqlTable;
-use crate::model::user_defined_type::CqlUserDefinedType;
+use crate::model::user_defined_type::ParsedCqlUserDefinedType;
 use crate::parse::Parse;
 
 impl<'de, E: ParseError<&'de str>> Parse<&'de str, E>
     for CqlStatement<
         CqlTable<&'de str, CqlColumn<&'de str, CqlIdentifier<&'de str>>, CqlIdentifier<&'de str>>,
-        CqlUserDefinedType<&'de str, CqlIdentifier<&'de str>>,
+        ParsedCqlUserDefinedType<&'de str, CqlIdentifier<&'de str>>,
     >
 {
     fn parse(input: &'de str) -> IResult<&'de str, Self, E> {
         alt((
-            map(CqlUserDefinedType::parse, |user_defined_type| {
+            map(ParsedCqlUserDefinedType::parse, |user_defined_type| {
                 CqlStatement::CreateUserDefinedType(user_defined_type)
             }),
             map(CqlTable::parse, |table| CqlStatement::CreateTable(table)),
@@ -96,7 +96,7 @@ mod test {
             CqlStatement::parse(input),
             Ok::<_, nom::Err<nom::error::Error<_>>>((
                 "",
-                CqlStatement::CreateUserDefinedType(CqlUserDefinedType::new(
+                CqlStatement::CreateUserDefinedType(ParsedCqlUserDefinedType::new(
                     true,
                     CqlQualifiedIdentifier::new(
                         Some(CqlIdentifier::Quoted("my_keyspace".to_string())),

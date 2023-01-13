@@ -18,7 +18,7 @@ jobs:
           - stable
           - beta
           - nightly
-          - 1.56.0
+          - ${{ env.RUST_MINVERSION }}
 
         features:
           - ''

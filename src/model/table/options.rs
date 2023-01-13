@@ -1,5 +1,7 @@
 use std::ops::Deref;
 use std::rc::Rc;
+use derive_new::new;
+use getset::{CopyGetters, Getters};
 use crate::model::Identifiable;
 use crate::model::identifier::CqlIdentifier;
 use crate::model::order::CqlOrder;
@@ -8,43 +10,17 @@ use crate::model::table::column::CqlColumn;
 
 /// The cql table options.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters, CopyGetters, new)]
 pub struct CqlTableOptions<I, ColumnRef> {
+    /// Has the compact storage keyword.
+    #[getset(get_copy = "pub")]
     compact_storage: bool,
     /// The clustering order.
+    #[getset(get = "pub")]
     clustering_order: Vec<(ColumnRef, CqlOrder)>,
     /// The other options.
+    #[getset(get = "pub")]
     options: Vec<(I, I)>,
-}
-
-impl<I, ColumnRef> CqlTableOptions<I, ColumnRef> {
-    /// Creates a new cql table options.
-    pub fn new(
-        compact_storage: bool,
-        clustering_order: Vec<(ColumnRef, CqlOrder)>,
-        options: Vec<(I, I)>,
-    ) -> Self {
-        Self {
-            compact_storage,
-            clustering_order,
-            options,
-        }
-    }
-
-    /// Returns true if the table has the compact storage option.
-    pub fn has_compact_storage(&self) -> bool {
-        self.compact_storage
-    }
-
-    /// Returns the clustering order.
-    pub fn clustering_order(&self) -> &Vec<(ColumnRef, CqlOrder)> {
-        &self.clustering_order
-    }
-
-    /// Returns the other options.
-    pub fn options(&self) -> &Vec<(I, I)> {
-        &self.options
-    }
 }
 
 impl<I, ColumnRef> CqlTableOptions<I, ColumnRef> {

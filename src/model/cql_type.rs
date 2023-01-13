@@ -4,10 +4,11 @@ use crate::model::statement::CqlStatement;
 use crate::model::Identifiable;
 use std::ops::Deref;
 use std::rc::Rc;
+use derive_more::{IsVariant, Unwrap};
 
 /// A CQL Type
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/types.html>
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, IsVariant, Unwrap)]
 pub enum CqlType<UdtType> {
     /// ASCII character string.
     ASCII,

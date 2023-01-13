@@ -1,24 +1,22 @@
 use crate::model::identifier::CqlIdentifier;
 use crate::model::Identifiable;
 use std::ops::Deref;
+use derive_new::new;
+use getset::Getters;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, new, Getters)]
 pub struct CqlQualifiedIdentifier<I> {
+    /// The keyspace of the identifier.
     keyspace: Option<CqlIdentifier<I>>,
+    /// The name of the identifier.
+    #[get = "pub"]
     name: CqlIdentifier<I>,
 }
 
 impl<I> CqlQualifiedIdentifier<I> {
-    pub fn new(keyspace: Option<CqlIdentifier<I>>, name: CqlIdentifier<I>) -> Self {
-        CqlQualifiedIdentifier { keyspace, name }
-    }
-
+    #[inline(always)]
     pub fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
         self.keyspace.as_ref()
-    }
-
-    pub fn name(&self) -> &CqlIdentifier<I> {
-        &self.name
     }
 }
 
@@ -29,10 +27,12 @@ impl<I: Deref<Target = str>> PartialEq for CqlQualifiedIdentifier<I> {
 }
 
 impl<I: Clone + Deref<Target = str>> Identifiable<I> for CqlQualifiedIdentifier<I> {
+    #[inline(always)]
     fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
         self.keyspace.as_ref()
     }
 
+    #[inline(always)]
     fn identifier(&self) -> &CqlIdentifier<I> {
         &self.name
     }

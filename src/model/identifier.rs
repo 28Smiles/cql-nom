@@ -1,4 +1,5 @@
 use std::ops::Deref;
+use derive_more::{IsVariant, Unwrap};
 use crate::model::Identifiable;
 
 /// Cql Identifier.
@@ -8,7 +9,7 @@ use crate::model::Identifiable;
 /// unquoted_identifier::= re('[a-zA-Z][link:[a-zA-Z0-9]]*')
 /// quoted_identifier::= '"' (any character where " can appear if doubled)+
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, IsVariant, Unwrap)]
 pub enum CqlIdentifier<I> {
     /// The unquoted identifier.
     Unquoted(I),
@@ -18,23 +19,15 @@ pub enum CqlIdentifier<I> {
 
 impl<I> CqlIdentifier<I> {
     /// Creates a new cql identifier.
+    #[inline(always)]
     pub fn new(identifier: I) -> Self {
         Self::Unquoted(identifier)
     }
 
     /// Creates a new quoted cql identifier.
+    #[inline(always)]
     pub fn new_quoted(identifier: String) -> Self {
         Self::Quoted(identifier)
-    }
-
-    /// Returns whether the identifier is quoted.
-    pub fn is_quoted(&self) -> bool {
-        matches!(self, Self::Quoted(_))
-    }
-
-    /// Returns whether the identifier is unquoted.
-    pub fn is_unquoted(&self) -> bool {
-        matches!(self, Self::Unquoted(_))
     }
 }
 
@@ -61,10 +54,12 @@ impl<I: Deref<Target = str>> Deref for CqlIdentifier<I> {
 }
 
 impl<I: Clone + Deref<Target = str>> Identifiable<I> for CqlIdentifier<I> {
+    #[inline(always)]
     fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
         None
     }
 
+    #[inline(always)]
     fn identifier(&self) -> &CqlIdentifier<I> {
         &self
     }

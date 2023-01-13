@@ -8,8 +8,10 @@ docsrs = []
 
 [dependencies]
 nom = "7"
-uuid = "1"
 derive-where = "1"
+getset = "0"
+derive-new = "0"
+derive_more = { version = "0", features = ["unwrap", "is_variant"] }
 
 [package.metadata.docs.rs]
 features = ["docsrs"]

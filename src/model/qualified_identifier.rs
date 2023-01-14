@@ -7,20 +7,15 @@ use std::ops::Deref;
 #[derive(Debug, Clone, new, Getters)]
 pub struct CqlQualifiedIdentifier<I> {
     /// The keyspace of the identifier.
+    #[getset(get = "pub")]
     keyspace: Option<CqlIdentifier<I>>,
     /// The name of the identifier.
-    #[get = "pub"]
+    #[getset(get = "pub")]
     name: CqlIdentifier<I>,
 }
 
-impl<I> CqlQualifiedIdentifier<I> {
-    #[inline(always)]
-    pub fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
-        self.keyspace.as_ref()
-    }
-}
-
 impl<I: Deref<Target = str>> PartialEq for CqlQualifiedIdentifier<I> {
+    #[inline(always)]
     fn eq(&self, other: &Self) -> bool {
         self.keyspace == other.keyspace && self.name == other.name
     }

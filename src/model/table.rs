@@ -10,11 +10,11 @@ use crate::model::table::options::CqlTableOptions;
 use crate::model::table::primary_key::CqlPrimaryKey;
 use crate::model::user_defined_type::CqlUserDefinedType;
 use crate::model::Identifiable;
+use derive_new::new;
 use derive_where::derive_where;
+use getset::{CopyGetters, Getters};
 use std::ops::Deref;
 use std::rc::Rc;
-use derive_new::new;
-use getset::{CopyGetters, Getters};
 
 /// The cql table.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>
@@ -84,9 +84,11 @@ pub struct CqlTable<I, Column, ColumnRef> {
 impl<I: Clone + Deref<Target = str>, Column, ColumnRef> Identifiable<I>
     for CqlTable<I, Column, ColumnRef>
 {
+    #[inline(always)]
     fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
-        self.name.keyspace()
+        self.name.keyspace().as_ref()
     }
+    #[inline(always)]
     fn identifier(&self) -> &CqlIdentifier<I> {
         self.name.identifier()
     }

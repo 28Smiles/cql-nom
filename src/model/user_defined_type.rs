@@ -3,7 +3,9 @@ use crate::model::identifier::CqlIdentifier;
 use crate::model::qualified_identifier::CqlQualifiedIdentifier;
 use crate::model::statement::CqlStatement;
 use crate::model::Identifiable;
+use derive_new::new;
 use derive_where::derive_where;
+use getset::{CopyGetters, Getters};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -31,51 +33,24 @@ use std::rc::Rc;
 ///    age int
 /// );
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Getters, CopyGetters, new)]
 #[derive_where(PartialEq; UdtTypeRef, I: std::ops::Deref<Target = str> + std::cmp::PartialEq)]
 pub struct ParsedCqlUserDefinedType<I, UdtTypeRef> {
+    #[getset(get_copy = "pub")]
     if_not_exists: bool,
     /// The name of the user-defined type.
+    #[getset(get = "pub")]
     name: CqlQualifiedIdentifier<I>,
     /// The fields of the user-defined type.
+    #[getset(get = "pub")]
     fields: Vec<(CqlIdentifier<I>, CqlType<UdtTypeRef>)>,
-}
-
-impl<I, UdtTypeRef> ParsedCqlUserDefinedType<I, UdtTypeRef> {
-    /// Creates a new user-defined type.
-    pub fn new(
-        if_not_exists: bool,
-        name: CqlQualifiedIdentifier<I>,
-        fields: Vec<(CqlIdentifier<I>, CqlType<UdtTypeRef>)>,
-    ) -> Self {
-        Self {
-            if_not_exists,
-            name,
-            fields,
-        }
-    }
-
-    /// Returns true if the user-defined type should only be created if it does not exist.
-    pub fn if_not_exists(&self) -> bool {
-        self.if_not_exists
-    }
-
-    /// Returns the name of the user-defined type.
-    pub fn name(&self) -> &CqlQualifiedIdentifier<I> {
-        &self.name
-    }
-
-    /// Returns the fields of the user-defined type.
-    pub fn fields(&self) -> &Vec<(CqlIdentifier<I>, CqlType<UdtTypeRef>)> {
-        &self.fields
-    }
 }
 
 impl<I: Clone + Deref<Target = str>, UdtTypeRef> Identifiable<I>
     for ParsedCqlUserDefinedType<I, UdtTypeRef>
 {
     fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
-        self.name.keyspace()
+        self.name.keyspace().as_ref()
     }
 
     fn identifier(&self) -> &CqlIdentifier<I> {
@@ -93,7 +68,7 @@ impl<I, UdtTypeRef> ParsedCqlUserDefinedType<I, UdtTypeRef> {
         I: Deref<Target = str> + Clone,
         UdtTypeRef: Identifiable<I>,
     {
-        let keyspace = self.name.keyspace().or(keyspace);
+        let keyspace = self.name.keyspace().as_ref().or(keyspace);
         let fields = self
             .fields
             .into_iter()
@@ -111,51 +86,26 @@ impl<I, UdtTypeRef> ParsedCqlUserDefinedType<I, UdtTypeRef> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Getters, CopyGetters, new)]
 #[derive_where(PartialEq; I: std::ops::Deref<Target = str> + std::cmp::PartialEq)]
 pub struct CqlUserDefinedType<I> {
+    #[getset(get_copy = "pub")]
     if_not_exists: bool,
     /// The name of the user-defined type.
+    #[getset(get = "pub")]
     name: CqlQualifiedIdentifier<I>,
     /// The fields of the user-defined type.
+    #[getset(get = "pub")]
     fields: Vec<(CqlIdentifier<I>, CqlType<Rc<CqlUserDefinedType<I>>>)>,
 }
 
-impl<I> CqlUserDefinedType<I> {
-    /// Creates a new user-defined type.
-    pub fn new(
-        if_not_exists: bool,
-        name: CqlQualifiedIdentifier<I>,
-        fields: Vec<(CqlIdentifier<I>, CqlType<Rc<CqlUserDefinedType<I>>>)>,
-    ) -> Self {
-        Self {
-            if_not_exists,
-            name,
-            fields,
-        }
-    }
-
-    /// Returns true if the user-defined type should only be created if it does not exist.
-    pub fn if_not_exists(&self) -> bool {
-        self.if_not_exists
-    }
-
-    /// Returns the name of the user-defined type.
-    pub fn name(&self) -> &CqlQualifiedIdentifier<I> {
-        &self.name
-    }
-
-    /// Returns the fields of the user-defined type.
-    pub fn fields(&self) -> &Vec<(CqlIdentifier<I>, CqlType<Rc<CqlUserDefinedType<I>>>)> {
-        &self.fields
-    }
-}
-
 impl<I: Clone + Deref<Target = str>> Identifiable<I> for CqlUserDefinedType<I> {
+    #[inline(always)]
     fn keyspace(&self) -> Option<&CqlIdentifier<I>> {
-        self.name.keyspace()
+        self.name.keyspace().as_ref()
     }
 
+    #[inline(always)]
     fn identifier(&self) -> &CqlIdentifier<I> {
         self.name.identifier()
     }

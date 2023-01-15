@@ -12,7 +12,8 @@ use nom::IResult;
 
 impl<'de, E: ParseError<&'de str>> Parse<&'de str, E> for CqlPrimaryKey<CqlIdentifier<&'de str>> {
     fn parse(input: &'de str) -> IResult<&'de str, Self, E> {
-        let (input, (partition_key, clustering_columns)) = space0_between((
+        let (input, (_, partition_key, clustering_columns, _)) = space0_between((
+            tag("("),
             alt((
                 map(CqlIdentifier::parse, |name| vec![name]),
                 delimited(
@@ -25,6 +26,7 @@ impl<'de, E: ParseError<&'de str>> Parse<&'de str, E> for CqlPrimaryKey<CqlIdent
                 tag(","),
                 separated_list1(tag(","), space0_around(CqlIdentifier::parse)),
             ))),
+            tag(")"),
         ))(input)?;
 
         Ok((

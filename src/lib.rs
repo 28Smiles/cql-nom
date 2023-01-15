@@ -128,7 +128,7 @@ mod test {
             my_field2 text,
             my_field3 frozen<my_type2>,
 
-            PRIMARY KEY (my_field1)
+            PRIMARY KEY (my_field1, my_field2)
         ) WITH CLUSTERING ORDER BY (my_field2 DESC);
         "#;
 
@@ -224,7 +224,10 @@ mod test {
                 column_my_field2.clone(),
                 column_my_field3.clone(),
             ],
-            Some(CqlPrimaryKey::new(vec![column_my_field1.clone()], vec![])),
+            Some(CqlPrimaryKey::new(
+                vec![column_my_field1.clone()],
+                vec![column_my_field2.clone()],
+            )),
             Some(CqlTableOptions::new(
                 false,
                 vec![(column_my_field2.clone(), CqlOrder::Desc)],

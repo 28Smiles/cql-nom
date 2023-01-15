@@ -1,9 +1,9 @@
-use crate::model::identifier::CqlIdentifier;
-use crate::model::Identifiable;
+use crate::model::*;
 use derive_new::new;
 use getset::Getters;
 use std::ops::Deref;
 
+/// A identifier with a possible keyspace prefix.
 #[derive(Debug, Clone, new, Getters)]
 pub struct CqlQualifiedIdentifier<I> {
     /// The keyspace of the identifier.

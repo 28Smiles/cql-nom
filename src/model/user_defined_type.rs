@@ -86,6 +86,7 @@ impl<I, UdtTypeRef> ParsedCqlUserDefinedType<I, UdtTypeRef> {
     }
 }
 
+/// User-defined type with resolved references.
 #[derive(Debug, Clone, Getters, CopyGetters, new)]
 #[derive_where(PartialEq; I: std::ops::Deref<Target = str> + std::cmp::PartialEq)]
 pub struct CqlUserDefinedType<I> {

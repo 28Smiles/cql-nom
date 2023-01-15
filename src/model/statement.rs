@@ -1,13 +1,9 @@
-use crate::model::identifier::CqlIdentifier;
-use crate::model::qualified_identifier::CqlQualifiedIdentifier;
-use crate::model::table::column::CqlColumn;
-use crate::model::table::CqlTable;
-use crate::model::user_defined_type::{CqlUserDefinedType, ParsedCqlUserDefinedType};
-use crate::model::Identifiable;
+use crate::model::*;
 use derive_more::IsVariant;
 use std::ops::Deref;
 use std::rc::Rc;
 
+/// The cql statement.
 #[derive(Debug, Clone, PartialEq, IsVariant)]
 pub enum CqlStatement<Table, UdtType> {
     /// A `CREATE TABLE` statement.

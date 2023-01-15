@@ -1,8 +1,4 @@
-use crate::model::identifier::CqlIdentifier;
-use crate::model::order::CqlOrder;
-use crate::model::qualified_identifier::CqlQualifiedIdentifier;
-use crate::model::table::column::CqlColumn;
-use crate::model::Identifiable;
+use crate::model::*;
 use derive_new::new;
 use getset::{CopyGetters, Getters};
 use std::ops::Deref;

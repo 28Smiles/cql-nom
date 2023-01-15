@@ -1,4 +1,4 @@
-use crate::model::Identifiable;
+use crate::model::*;
 use derive_more::{IsVariant, Unwrap};
 use std::ops::Deref;
 

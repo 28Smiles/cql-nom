@@ -1,20 +1,20 @@
-pub mod column;
-pub mod options;
-pub mod primary_key;
-
-use crate::model::identifier::CqlIdentifier;
-use crate::model::qualified_identifier::CqlQualifiedIdentifier;
-use crate::model::statement::CqlStatement;
-use crate::model::table::column::CqlColumn;
-use crate::model::table::options::CqlTableOptions;
-use crate::model::table::primary_key::CqlPrimaryKey;
-use crate::model::user_defined_type::CqlUserDefinedType;
-use crate::model::Identifiable;
+use crate::model::*;
 use derive_new::new;
 use derive_where::derive_where;
 use getset::{CopyGetters, Getters};
 use std::ops::Deref;
 use std::rc::Rc;
+
+/// A column of a table.
+pub mod column;
+/// The table options.
+pub mod options;
+/// The table primary key definition.
+pub mod primary_key;
+
+pub use column::*;
+pub use options::*;
+pub use primary_key::*;
 
 /// The cql table.
 /// More Information: <https://cassandra.apache.org/doc/latest/cassandra/cql/ddl.html#create-table-statement>

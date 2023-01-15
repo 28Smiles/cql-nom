@@ -1,7 +1,4 @@
-use crate::model::identifier::CqlIdentifier;
-use crate::model::qualified_identifier::CqlQualifiedIdentifier;
-use crate::model::statement::CqlStatement;
-use crate::model::Identifiable;
+use crate::model::*;
 use derive_more::{IsVariant, Unwrap};
 use std::ops::Deref;
 use std::rc::Rc;
